@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book DJ Carlos</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #8B5CF6;
+      --pink:   #EC4899;
+      --bg:     #0D0D0D;
+      --surface: #161616;
+      --surface2: #1e1e1e;
+      --border:  rgba(139,92,246,0.2);
+      --border-focus: rgba(139,92,246,0.7);
+      --text:   #F1F1F1;
+      --muted:  rgba(241,241,241,0.38);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2.5rem;
+      background: rgba(13,13,13,0.8);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(139,92,246,0.15);
+    }
+
+    .nav-logo {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
+    }
+
+    .nav-links a:hover  { opacity: 1; color: var(--purple); }
+    .nav-links a.active { opacity: 1; color: var(--purple); }
+
+    /* ── PAGE ── */
+    main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 6.5rem 1.5rem 5rem;
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 2.8rem;
+      position: relative;
+    }
+
+    /* decorative glow behind title */
+    .page-header::before {
+      content: '';
+      position: absolute;
+      width: 340px; height: 160px;
+      background: radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .page-header h1 {
+      position: relative;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-header p {
+      position: relative;
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      line-height: 1.6;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem 2.25rem;
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,0.05),
+        0 24px 60px rgba(0,0,0,0.55),
+        0 0 80px rgba(139,92,246,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle corner glow */
+    .form-card::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%);
+      top: -80px; right: -60px;
+      pointer-events: none;
+    }
+
+    .form-card::after {
+      content: '';
+      position: absolute;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(236,72,153,0.07), transparent 70%);
+      bottom: -50px; left: -40px;
+      pointer-events: none;
+    }
+
+    /* ── GRID ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4rem 1.6rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .form-group:focus-within label { color: var(--purple); }
+
+    /* ── INPUTS ── */
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: 48px;
+      background: var(--surface2);
+      border: 1px solid rgba(139,92,246,0.18);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.92rem;
+      padding: 0.75rem 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.14), 0 0 16px rgba(139,92,246,0.1);
+      background: #242424;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(241,241,241,0.2);
+    }
+
+    /* date input icon tint */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.6) sepia(1) saturate(3) hue-rotate(220deg);
+      cursor: pointer;
+      opacity: 0.7;
+    }
+
+    /* select arrow */
+    .select-wrap { position: relative; }
+
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 0.95rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--purple);
+      pointer-events: none;
+    }
+
+    select { padding-right: 2.4rem; cursor: pointer; }
+
+    select option {
+      background: #1e1e1e;
+      color: var(--text);
+    }
+
+    /* empty / placeholder option */
+    select option[value=""] { color: rgba(241,241,241,0.3); }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+
+    /* ── DIVIDER ── */
+    .form-divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139,92,246,0.25), transparent);
+      margin: 0.4rem 0;
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      box-shadow: 0 0 24px rgba(139,92,246,0.45), 0 0 60px rgba(236,72,153,0.15);
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(139,92,246,0.65), 0 0 80px rgba(236,72,153,0.3);
+    }
+
+    .btn-submit:hover::before { opacity: 1; }
+
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* spinner */
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-submit.loading .spinner     { display: block; }
+    .btn-submit.loading .btn-text    { opacity: 0.7; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid rgba(139,92,246,0.28);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,0.08),
+        0 32px 80px rgba(0,0,0,0.7),
+        0 0 100px rgba(139,92,246,0.1);
+      transform: translateY(28px) scale(0.97);
+      opacity: 0;
+      transition: transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    }
+
+    .modal-overlay.visible .modal-card {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .modal-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.8rem;
+      box-shadow: 0 0 40px rgba(139,92,246,0.55), 0 0 70px rgba(236,72,153,0.25);
+    }
+
+    .modal-icon svg {
+      stroke-dasharray: 30;
+      stroke-dashoffset: 30;
+    }
+
+    .modal-overlay.visible .modal-icon svg {
+      animation: draw-check 0.4s 0.32s ease forwards;
+    }
+
+    @keyframes draw-check {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .modal-card h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.85rem;
+    }
+
+    .modal-card p {
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.7;
+      max-width: 320px;
+      margin: 0 auto 2rem;
+    }
+
+    .btn-modal-close {
+      padding: 0.85rem 2.5rem;
+      border: none;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      box-shadow: 0 0 24px rgba(139,92,246,0.45), 0 0 50px rgba(236,72,153,0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-modal-close:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(139,92,246,0.65), 0 0 70px rgba(236,72,153,0.3);
+    }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      display: none;
+      grid-column: 1 / -1;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.35);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    .error-banner.visible { display: block; }
+
+    /* ── REQUIRED STAR ── */
+    .req { color: var(--pink); margin-left: 2px; }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      position: relative;
+      padding: 3rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .site-footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 8%; right: 8%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple), var(--pink), transparent);
+    }
+
+    .footer-inner { max-width: 600px; margin: 0 auto; }
+
+    .footer-socials {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(139,92,246,0.3);
+      color: rgba(241,241,241,0.45);
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .social-link svg { width: 18px; height: 18px; }
+
+    .social-link:hover {
+      color: var(--pink);
+      border-color: var(--pink);
+      box-shadow: 0 0 18px rgba(236,72,153,0.4);
+      transform: translateY(-2px);
+    }
+
+    .footer-email {
+      display: inline-block;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: rgba(241,241,241,0.45);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .footer-email:hover { color: var(--purple); }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: rgba(241,241,241,0.22);
+      letter-spacing: 0.06em;
+    }
+
+    .footer-copy span {
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 580px) {
+      nav { padding: 1rem 1.2rem; }
+      .nav-links { gap: 1.4rem; }
+      .form-card { padding: 1.5rem 1.2rem; }
+      .form-grid { grid-template-columns: 1fr; gap: 1.1rem; }
+      .form-group.full { grid-column: 1; }
+      .btn-submit { grid-column: 1; }
+      .error-banner { grid-column: 1; }
+
+      /* 16px minimum prevents iOS Safari from zooming on input focus */
+      input[type="text"],
+      input[type="email"],
+      input[type="date"],
+      select,
+      textarea { font-size: 1rem; }
+
+      /* let the native mobile date picker render without our icon override */
+      input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+    }
+    /* ── PAGE LOADER ── */
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader-content { text-align: center; }
+
+    .loader-logo {
+      font-size: clamp(2.2rem, 10vw, 5rem);
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      margin: 0 0 2rem;
+      text-shadow:
+        0 0 10px rgba(139,92,246,0.9),
+        0 0 30px rgba(139,92,246,0.7),
+        0 0 70px rgba(236,72,153,0.6),
+        0 0 120px rgba(236,72,153,0.3);
+      animation: loader-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loader-pulse {
+      0%, 100% {
+        text-shadow:
+          0 0 10px rgba(139,92,246,0.9),
+          0 0 30px rgba(139,92,246,0.7),
+          0 0 70px rgba(236,72,153,0.6),
+          0 0 120px rgba(236,72,153,0.3);
+      }
+      50% {
+        text-shadow:
+          0 0 20px rgba(139,92,246,1),
+          0 0 60px rgba(139,92,246,0.9),
+          0 0 110px rgba(236,72,153,0.8),
+          0 0 180px rgba(236,72,153,0.5);
+      }
+    }
+
+    .loader-track {
+      width: 200px;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .loader-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--purple), var(--pink));
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(236,72,153,0.5);
+      animation: loader-fill 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes loader-fill {
+      to { width: 75%; }
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE LOADER -->
+  <div id="page-loader">
+    <div class="loader-content">
+      <p class="loader-logo">DJ Carlos</p>
+      <div class="loader-track">
+        <div class="loader-bar" id="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var loader = document.getElementById('page-loader');
+      var bar    = document.getElementById('loader-bar');
+      var start  = performance.now();
+      var MIN_MS = 700;
+      window.addEventListener('load', function () {
+        var remaining = Math.max(0, MIN_MS - (performance.now() - start));
+        setTimeout(function () {
+          bar.style.transition = 'width 0.2s ease-out';
+          bar.style.width = '100%';
+          setTimeout(function () {
+            loader.style.transition = 'opacity 0.45s ease';
+            loader.style.opacity    = '0';
+            loader.style.pointerEvents = 'none';
+            setTimeout(function () { loader.remove(); }, 460);
+          }, 250);
+        }, remaining);
+      });
+    }());
+  </script>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">DJ Carlos</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="mixes.html">Mixes</a></li>
+      <li><a href="booking.html" class="active">Book</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <div class="page-header fade-up">
+      <h1>Book DJ Carlos</h1>
+      <p>Fill out the form and we'll get back to you within 24 hours<br>to confirm your booking.</p>
+    </div>
+
+    <div class="form-card fade-up" id="form-card">
+
+      <!-- FORM -->
+      <form id="booking-form" novalidate>
+        <div class="form-grid" id="form-grid">
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="name">Full Name <span class="req">*</span></label>
+            <input type="text" id="name" name="name"
+                   placeholder="Your full name" required autocomplete="name" />
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email">Email Address <span class="req">*</span></label>
+            <input type="email" id="email" name="email"
+                   placeholder="you@example.com" required autocomplete="email" inputmode="email" />
+          </div>
+
+          <!-- Event Date -->
+          <div class="form-group">
+            <label for="event-date">Event Date <span class="req">*</span></label>
+            <input type="date" id="event-date" name="event_date" required />
+          </div>
+
+          <!-- Event Type -->
+          <div class="form-group">
+            <label for="event-type">Event Type <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="event-type" name="event_type" required>
+                <option value="" disabled selected>Select event type</option>
+                <option value="Wedding">Wedding</option>
+                <option value="Corporate">Corporate</option>
+                <option value="Club Night">Club Night</option>
+                <option value="Private Party">Private Party</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-divider"></div>
+
+          <!-- Venue -->
+          <div class="form-group">
+            <label for="venue">Venue Name</label>
+            <input type="text" id="venue" name="venue_name"
+                   placeholder="e.g. Área, Roma Norte" />
+          </div>
+
+          <!-- Budget -->
+          <div class="form-group">
+            <label for="budget">Budget Range <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="budget" name="budget_range" required>
+                <option value="" disabled selected>Select budget</option>
+                <option value="Under $500">Under $500</option>
+                <option value="$500–$1,000">$500–$1,000</option>
+                <option value="$1,000–$2,500">$1,000–$2,500</option>
+                <option value="$2,500+">$2,500+</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Additional Details -->
+          <div class="form-group full">
+            <label for="details">Additional Details</label>
+            <textarea id="details" name="additional_details"
+                      placeholder="Tell us about your event — theme, expected attendance, any special requests…"></textarea>
+          </div>
+
+          <!-- Error -->
+          <div class="error-banner" id="error-banner" role="alert">
+            Something went wrong submitting your request. Please try again or
+            email directly at <strong>bookings@djcarlos.mx</strong>.
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-submit" id="btn-submit">
+            <span class="spinner"></span>
+            <span class="btn-text">Send Booking Request</span>
+          </button>
+
+        </div><!-- /form-grid -->
+      </form>
+
+    </div><!-- /form-card -->
+
+  </main>
+
+  <script>
+    // Scroll fade-in for page header and form card
+    (function () {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var el = entry.target;
+          el.classList.add('visible');
+          io.unobserve(el);
+          el.addEventListener('transitionend', function cleanup(e) {
+            if (e.propertyName !== 'opacity') return;
+            el.classList.remove('fade-up', 'visible');
+            el.removeEventListener('transitionend', cleanup);
+          });
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.fade-up').forEach(function (el) { io.observe(el); });
+    }());
+  </script>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-socials">
+        <a href="#" class="social-link" aria-label="SoundCloud" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1.175 12.225c-.017 0-.034 0-.05.002-.04-2.552 2.009-4.635 4.562-4.676.19-.004.378.008.567.035C6.862 5.38 9.24 3.5 12.05 3.5c3.1 0 5.613 2.513 5.613 5.613 0 .082-.002.164-.005.246.277-.085.571-.133.876-.133 1.59 0 2.88 1.29 2.88 2.88s-1.29 2.88-2.88 2.88H1.175a1.175 1.175 0 0 1 0-2.35v-.411z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="Spotify" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="YouTube" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+      </div>
+      <a href="mailto:bookings@djcarlos.mx" class="footer-email">bookings@djcarlos.mx</a>
+      <p class="footer-copy">&copy; 2026 <span>DJ Carlos</span> &nbsp;·&nbsp; Mexico City &nbsp;·&nbsp; All rights reserved</p>
+    </div>
+  </footer>
+
+  <!-- CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none"
+             stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2 id="modal-heading">Booking Request Sent!</h2>
+      <p>Carlos will review your request and get back to you within 24 hours.</p>
+      <button class="btn-modal-close" id="btn-modal-close">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const form         = document.getElementById('booking-form');
+    const errorBanner  = document.getElementById('error-banner');
+    const btnSubmit    = document.getElementById('btn-submit');
+    const btnText      = btnSubmit.querySelector('.btn-text');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const btnModalClose = document.getElementById('btn-modal-close');
+
+    /* ── set date minimum to today ── */
+    const todayISO = new Date().toISOString().split('T')[0];
+    document.getElementById('event-date').setAttribute('min', todayISO);
+
+    /* ── close button reloads so user can submit another request ── */
+    btnModalClose.addEventListener('click', () => location.reload());
+
+    /* ── submit to Formspree ── */
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      errorBanner.classList.remove('visible');
+      btnSubmit.classList.add('loading');
+      btnSubmit.disabled = true;
+      btnText.textContent = 'Sending...';
+
+      const data = new FormData(form);
+
+      try {
+        const res = await fetch('https://formspree.io/f/xgodozkd', {
+          method: 'POST',
+          body: data,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (res.ok) {
+          modalOverlay.classList.add('visible');
+        } else {
+          throw new Error('Non-OK response');
+        }
+      } catch {
+        errorBanner.classList.add('visible');
+        btnSubmit.classList.remove('loading');
+        btnSubmit.disabled = false;
+        btnText.textContent = 'Send Booking Request';
+      }
+    });
+  </script>
+
+</body>
+</html>
